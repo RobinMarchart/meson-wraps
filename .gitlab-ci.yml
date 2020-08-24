@@ -19,4 +19,4 @@ gen-site:
         paths:
             - wraps-site/public
     dependencies:
-        gen-wraps
+        - gen-wraps
