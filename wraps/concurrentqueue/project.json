@@ -1,0 +1,7 @@
+{
+    "descr":"An industrial-strength lock-free queue for C++.",
+    "readme":{
+        "href":"https://github.com/cameron314/concurrentqueue/blob/{version}/README.md",
+        "url":"https://github.com/cameron314/concurrentqueue/raw/{version}/README.md"
+    }
+}

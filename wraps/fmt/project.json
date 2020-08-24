@@ -1,0 +1,7 @@
+{
+    "descr":"**{fmt}** is an open-source formatting library for C++. It can be used as a safe and fast alternative to (s)printf and iostreams.",
+    "readme":{
+        "href":"https://github.com/fmtlib/fmt/blob/{version}/README.rst",
+        "url":"https://github.com/fmtlib/fmt/raw/{version}/README.rst"
+    }
+}

@@ -3,52 +3,103 @@ import pathlib
 import argparse
 import json
 import itertools
-import re
-import operator
-import sys
-import functools
 import shutil
-import urllib.parse
 import os
 import hashlib
+import typing
 
 
-class MacroSet:
-    pattern = re.compile("@.*?@")
+class Readme:
+    href: str = ""
+    url: str = ""
 
-    def __init__(self):
-        self.macros = {}
+    def from_dict(dictionary) -> "Readme":
+        readme: Readme = Readme()
+        if isinstance(dictionary, dict):
+            if "href" in dictionary:
+                readme.href = dictionary["href"]
+            if "url" in dictionary:
+                readme.url = dictionary["url"]
+        return readme
 
-    def add_macro(self, name: str, replacement: str):
-        self.macros[name] = replacement
+    def to_dict(self) -> dict:
+        if self.href == "":
+            self.href = self.url
+        return {"href": self.href, "url": self.url}
 
-    def replace_macros(
-        self,
-        text: str,
-        failure_fn=lambda index, err: print(
-            "Problem replacing macros at {index}: {err}".format(index=index, err=err),
-            sys.stderr,
-        ),
-    ) -> str:
-        return functools.reduce(
-            operator.add,
-            self.__insert_macros(text, self.pattern.finditer(text), failure_fn),
-        )
 
-    def __insert_macros(self, string, iter, failure_fn):
-        start = 0
-        for match in iter:
-            yield string[start : match.start()]
-            key = match.group()[1:-1]
-            if key == "":
-                yield "@"
-            elif key in self.macros:
-                yield self.macros[key]
-            else:
-                failure_fn(match.start(), "could not find {}".format(key))
-                yield match.group()
-            start = match.end()
-        yield string[start:]
+class Version:
+    name: str = ""
+    wrap: str = ""
+    patch: str = ""
+    readme: Readme = Readme()
+
+    @staticmethod
+    def from_dict(dictionary) -> "Version":
+        version: Version = Version()
+        if isinstance(dictionary, dict):
+            if "name" in dictionary:
+                version.name = dictionary["name"]
+            if "wrap" in dictionary:
+                version.wrap = dictionary["wrap"]
+            if "patch" in dictionary:
+                version.patch = dictionary["patch"]
+            if "readme" in dictionary:
+                version.readme = Readme.from_dict(dictionary["readme"])
+        return version
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "wrap": self.wrap,
+            "patch": self.patch,
+            "readme": self.readme.to_dict(),
+        }
+
+
+class Project:
+    name: str = ""
+    descr: str = ""
+    versions: typing.List[Version] = []
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "descr": self.descr,
+            "versions": [version.to_dict() for version in self.versions],
+        }
+
+
+class ProjectTemplate:
+    name: str = ""
+    descr: str = ""
+    readme: Readme = Readme()
+
+    @staticmethod
+    def from_dict(dictionary) -> "ProjectTemplate":
+        proj: ProjectTemplate = ProjectTemplate()
+        if isinstance(dictionary, dict):
+            if "name" in dictionary:
+                proj.name = dictionary["name"]
+            if "descr" in dictionary:
+                proj.descr = dictionary["descr"]
+            if "readme" in dictionary:
+                proj.readme = Readme.from_dict(dictionary["readme"])
+        return proj
+
+    def __processVersion(self, version: Version) -> Version:
+        if version.readme.href == "":
+            version.readme.href = self.readme.href.format(version=version.name)
+        if version.readme.url == "":
+            version.readme.url = self.readme.url.format(version=version.name)
+        return version
+
+    def to_project(self, versions: typing.List[Version]):
+        proj: Project = Project()
+        proj.name = self.name
+        proj.descr = self.descr
+        proj.versions = [self.__processVersion(v) for v in versions]
+        return proj
 
 
 def to_ex_dir(p: str) -> pathlib.Path:
@@ -69,85 +120,82 @@ def to_opt_dir(p: str) -> pathlib.Path:
 
 
 def gen_version_dir(
-    version_dir: pathlib.Path, out_dir: pathlib.Path, base_url: str
-) -> str:
-    macros = MacroSet()
-    o_dir = out_dir / version_dir.name
-    o_dir.mkdir(exist_ok=True)
-    p_d = list(
-        itertools.filterfalse(
-            lambda cont: not cont.is_dir(), (x for x in version_dir.iterdir())
+    version_dir: pathlib.Path, out_dir: pathlib.Path, project_name: str
+) -> Version:
+    macros: typing.Dict[str, str] = {}
+
+    version = Version()
+    if (version_dir / "version.json").is_file():
+        with (version_dir / "version.json").open() as version_f:
+            version = Version.from_dict(json.load(version_f))
+    if version.name == "":
+        version.name = version_dir.name
+    if version.patch == "":
+        p_d = list(
+            itertools.filterfalse(
+                lambda cont: not cont.is_dir(), (x for x in version_dir.iterdir())
+            )
         )
-    )
-    if len(p_d) == 1:
-        os.chdir(o_dir)
-        patch_name = shutil.make_archive("patch", "gztar", p_d[0])
-        macros.add_macro(
-            "patch_url",
-            urllib.parse.urljoin(
-                base_url,
-                "{project}/{version}/{patchname}".format(
-                    project=out_dir.name,
-                    version=o_dir.name,
-                    patchname=pathlib.PurePath(patch_name).name,
+        if len(p_d) == 1:
+            patch_file = shutil.make_archive(
+                "patch-{project}-{version}".format(
+                    project=project_name, version=version.name
                 ),
-            ),
+                "gztar",
+                p_d[0],
+            )
+            version.patch = os.path.abspath(patch_file)
+            with open(patch_file, "rb") as patch_f:
+                macros["patch_hash"] = hashlib.sha256(patch_f.read()).hexdigest()
+
+    if version.wrap == "":
+        path = out_dir / (
+            "{project}-{version}.wrap".format(
+                project=project_name, version=version.name
+            )
         )
-        with open(patch_name, "rb") as patch_f:
-            macros.add_macro("patch_hash", hashlib.sha256(patch_f.read()).hexdigest())
-
-    with (
-        o_dir
-        / ("{project}-{version}.wrap".format(project=out_dir.name, version=o_dir.name))
-    ).open("w") as out:
-        with (version_dir / "wrap.ini").open() as in_f:
-            out.write(macros.replace_macros(in_f.read()))
-    return o_dir.name
+        with path.open("w") as out_f:
+            with (version_dir / "wrap.ini").open() as in_f:
+                out_f.write(in_f.read().format_map(macros))
+        version.wrap = str(path)
+    return version
 
 
-def gen_project_dir(
-    project_dir: pathlib.Path, output_dir: pathlib.Path, base_url: str
-) -> str:
-    out_dir = output_dir / project_dir.name
-    out_dir.mkdir(exist_ok=True)
-    dir_content = [x for x in project_dir.iterdir()]
+def gen_project_dir(project_dir: pathlib.Path, output_dir: pathlib.Path) -> Project:
+    project_template: ProjectTemplate = ProjectTemplate()
+    if (project_dir / "project.json").is_file():
+        with (project_dir / "project.json").open() as project_f:
+            project_template = ProjectTemplate.from_dict(json.load(project_f))
+    if project_template.name == "":
+        project_template.name = project_dir.name
+    dir_content = project_dir.iterdir()
     versions = itertools.filterfalse(lambda d_cont: not d_cont.is_dir(), dir_content)
-    version_names = [gen_version_dir(pro, out_dir, base_url) for pro in versions]
-    project_info_template = project_dir / "project.json"
-
-    def load_p(p):
-        with p.open() as f:
-            return json.load(f)
-
-    project_info = (
-        load_p(project_info_template) if project_info_template.is_file() else {}
-    )
-    project_info["versions"] = version_names
-    with (out_dir / "project.json").open("w") as out_f:
-        json.dump(project_info, out_f)
-    return project_dir.name
+    versions = [
+        gen_version_dir(pro, output_dir, project_template.name) for pro in versions
+    ]
+    return project_template.to_project(versions)
 
 
-def gen_root_dir(input: pathlib.Path, output: pathlib.Path, base_url: str):
-    root_index_file = output / "index.json"
-    dir_content = [x for x in input.iterdir()]
+def gen_root_dir(input: pathlib.Path, output: pathlib.Path):
+    root_index_file = output / "projects.json"
+    files_output_dir = output / "files"
+    files_output_dir.mkdir(exist_ok=True)
+    os.chdir(files_output_dir)
+    dir_content = input.iterdir()
     projects = itertools.filterfalse(lambda d_cont: not d_cont.is_dir(), dir_content)
-    project_names = [gen_project_dir(pro, output, base_url) for pro in projects]
+    projects = [gen_project_dir(pro, files_output_dir) for pro in projects]
     with root_index_file.open("w") as out_f:
-        json.dump({"projects": project_names}, out_f)
+        json.dump(
+            [project.to_dict() for project in projects], out_f, indent=4, sort_keys=True
+        )
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir", type=to_ex_dir)
     parser.add_argument("output_dir", type=to_opt_dir)
-    parser.add_argument(
-        "base_url", type=lambda url: urllib.parse.urlunparse(urllib.parse.urlparse(url))
-    )
     args = parser.parse_args()
-    gen_root_dir(
-        args.input_dir.resolve(True), args.output_dir.resolve(True), args.base_url
-    )
+    gen_root_dir(args.input_dir.resolve(True), args.output_dir.resolve(True))
 
 
 if __name__ == "__main__":

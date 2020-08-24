@@ -1,0 +1,6 @@
+project('concurrentqueue',license:['BSD','Boost'],version:'1.0.2')
+concurrentqueue_dep = declare_dependency(include_directories:include_directories('.'))
+meson.override_dependency('concurrentqueue',concurrentqueue_dep)
+meson.override_dependency('concurrentqueue-1',concurrentqueue_dep)
+meson.override_dependency('concurrentqueue-1.0',concurrentqueue_dep)
+meson.override_dependency('concurrentqueue-1.0.2',concurrentqueue_dep)
