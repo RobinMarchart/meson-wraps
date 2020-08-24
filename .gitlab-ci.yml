@@ -1,0 +1,22 @@
+stages:
+    - gen-wraps
+    - gen-site
+    - deploy
+
+gen-wraps:
+    stage: gen-wraps
+    image: python:latest
+    script: ./gen.py wraps wraps_gen
+    artifacts:
+        paths:
+            - wraps_gen
+
+gen-site:
+    stage: gen-site
+    image: robinmarchart/meson-builder:site-builder
+    script: cd wraps-site;yarn install;node node_modules/.bin/gatsby build
+    artifacts:
+        paths:
+            - wraps-site/public
+    dependencies:
+        gen-wraps
