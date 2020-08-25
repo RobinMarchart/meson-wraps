@@ -15,12 +15,9 @@ gen-site:
     stage: generate
     image: robinmarchart/meson-builder:site-builder
     script: 
-        - |
-            cd wraps-site
-            yarn install --frozen-lockfile --check-files --non-interactive
-        - |
-            cd wraps-site
-            node node_modules/.bin/gatsby build
+        - cd wraps-site
+        - yarn install --frozen-lockfile --check-files --non-interactive
+        - node node_modules/.bin/gatsby build
     artifacts:
         paths:
             - wraps-site/public
