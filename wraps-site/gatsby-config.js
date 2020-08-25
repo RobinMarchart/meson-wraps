@@ -17,4 +17,5 @@ module.exports = {
     'gatsby-transformer-remark',
     'gatsby-transformer-plaintext',
   ],
+  pathPrefix: `/meson-wraps`,
 };
