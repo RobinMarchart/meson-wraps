@@ -1,10 +1,10 @@
 stages:
-    - gen-wraps
-    - gen-site
+    - prepare
+    - generate
     - deploy
 
 gen-wraps:
-    stage: gen-wraps
+    stage: prepare
     image: python:latest
     script: ./gen.py wraps wraps_gen
     artifacts:
@@ -12,11 +12,35 @@ gen-wraps:
             - wraps_gen
 
 gen-site:
-    stage: gen-site
+    stage: generate
     image: robinmarchart/meson-builder:site-builder
-    script: cd wraps-site;yarn install;node node_modules/.bin/gatsby build
+    script: 
+        - |
+            cd wraps-site
+            yarn install --frozen-lockfile --check-files --non-interactive
+        - |
+            cd wraps-site
+            node node_modules/.bin/gatsby build
     artifacts:
         paths:
             - wraps-site/public
     dependencies:
         - gen-wraps
+    cache:
+        policy: pull-push
+        key: node_modules
+        paths:
+            - wraps-site/node-modules
+
+pages:
+    stage: deploy
+    dependencies:
+        - gen-site
+    artifacts:
+        paths:
+            - public
+    script: cp -r wraps-site/public ./
+    rules:
+        - if: $CI_COMMIT_BRANCH == "master"
+    
+
