@@ -17,7 +17,7 @@ gen-site:
     script: 
         - cd wraps-site
         - yarn install --frozen-lockfile --check-files --non-interactive
-        - node node_modules/.bin/gatsby build --prefix-paths
+        - node node_modules/.bin/gatsby build --prefix-paths meson-wraps
     artifacts:
         paths:
             - wraps-site/public
