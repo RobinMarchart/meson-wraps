@@ -7,6 +7,7 @@ import shutil
 import os
 import hashlib
 import typing
+import urllib.parse
 
 
 class Readme:
@@ -120,7 +121,7 @@ def to_opt_dir(p: str) -> pathlib.Path:
 
 
 def gen_version_dir(
-    version_dir: pathlib.Path, out_dir: pathlib.Path, project_name: str
+        version_dir: pathlib.Path, out_dir: pathlib.Path, project_name: str,url_base:str
 ) -> Version:
     macros: typing.Dict[str, str] = {}
 
@@ -130,6 +131,8 @@ def gen_version_dir(
             version = Version.from_dict(json.load(version_f))
     if version.name == "":
         version.name = version_dir.name
+    out=out_dir/project_name/version.name
+    out.mkdir(parents=True,exist_ok=True)
     if version.patch == "":
         p_d = list(
             itertools.filterfalse(
@@ -137,6 +140,7 @@ def gen_version_dir(
             )
         )
         if len(p_d) == 1:
+            os.chdir(out)
             patch_file = shutil.make_archive(
                 "patch-{project}-{version}".format(
                     project=project_name, version=version.name
@@ -144,12 +148,13 @@ def gen_version_dir(
                 "gztar",
                 p_d[0],
             )
-            version.patch = os.path.abspath(patch_file)
+            version.patch = urllib.parse.urljoin(url_base, "{project}/{version}/patch-{project}-{version}.tar.gz".format(project=project_name,version=version.name))
+            macros["patch_url"]=version.patch
             with open(patch_file, "rb") as patch_f:
                 macros["patch_hash"] = hashlib.sha256(patch_f.read()).hexdigest()
 
     if version.wrap == "":
-        path = out_dir / (
+        path = out / (
             "{project}-{version}.wrap".format(
                 project=project_name, version=version.name
             )
@@ -157,11 +162,13 @@ def gen_version_dir(
         with path.open("w") as out_f:
             with (version_dir / "wrap.ini").open() as in_f:
                 out_f.write(in_f.read().format_map(macros))
-        version.wrap = str(path)
+        version.wrap = urllib.parse.urljoin(url_base, "{project}/{version}/{project}-{version}.wrap".format(
+            project=project_name, version=version.name
+        ))
     return version
 
 
-def gen_project_dir(project_dir: pathlib.Path, output_dir: pathlib.Path) -> Project:
+def gen_project_dir(project_dir: pathlib.Path, output_dir: pathlib.Path,url_base:str) -> Project:
     project_template: ProjectTemplate = ProjectTemplate()
     if (project_dir / "project.json").is_file():
         with (project_dir / "project.json").open() as project_f:
@@ -171,19 +178,18 @@ def gen_project_dir(project_dir: pathlib.Path, output_dir: pathlib.Path) -> Proj
     dir_content = project_dir.iterdir()
     versions = itertools.filterfalse(lambda d_cont: not d_cont.is_dir(), dir_content)
     versions = [
-        gen_version_dir(pro, output_dir, project_template.name) for pro in versions
+        gen_version_dir(pro, output_dir, project_template.name,url_base) for pro in versions
     ]
     return project_template.to_project(versions)
 
 
-def gen_root_dir(input: pathlib.Path, output: pathlib.Path):
-    root_index_file = output / "projects.json"
-    files_output_dir = output / "files"
+def gen_root_dir(input: pathlib.Path, output: pathlib.Path,url_base:str):
+    root_index_file = output / "index.json"
+    files_output_dir = output
     files_output_dir.mkdir(exist_ok=True)
-    os.chdir(files_output_dir)
     dir_content = input.iterdir()
     projects = itertools.filterfalse(lambda d_cont: not d_cont.is_dir(), dir_content)
-    projects = [gen_project_dir(pro, files_output_dir) for pro in projects]
+    projects = [gen_project_dir(pro, files_output_dir,url_base) for pro in projects]
     with root_index_file.open("w") as out_f:
         json.dump(
             [project.to_dict() for project in projects], out_f, indent=4, sort_keys=True
@@ -194,8 +200,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir", type=to_ex_dir)
     parser.add_argument("output_dir", type=to_opt_dir)
+    parser.add_argument("url_base")
     args = parser.parse_args()
-    gen_root_dir(args.input_dir.resolve(True), args.output_dir.resolve(True))
+    gen_root_dir(args.input_dir.resolve(True), args.output_dir.resolve(True),args.url_base)
 
 
 if __name__ == "__main__":

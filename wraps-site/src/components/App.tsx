@@ -23,12 +23,6 @@ type QueryData = {
       };
     }[];
   };
-  allFile: {
-    nodes: {
-      absolutePath: 'string';
-      publicURL: 'string';
-    }[];
-  };
   allProjectsJson: {
     nodes: {
       descr: string;
@@ -68,7 +62,7 @@ export type ProjectsFormat = Map<string, ProjectInfo>;
 
 function formatProject(data: QueryData): ProjectsFormat {
   return new Map(
-    data.allProjectsJson.nodes.map((project) => [
+    data.allIndexJson.nodes.map((project) => [
       project.name,
       {
         name: project.name,
@@ -88,12 +82,8 @@ function formatProject(data: QueryData): ProjectsFormat {
                     (x) => x.source_url === version.readme.url,
                   ).parent.extension === 'md',
               },
-              wrap_url: data.allFile.nodes.find(
-                (x) => x.absolutePath === version.wrap,
-              ).publicURL,
-              patch_url: data.allFile.nodes.find(
-                (x) => x.absolutePath === version.patch,
-              ).publicURL,
+              wrap_url: version.wrap,
+              patch_url: version.patch,
             },
           ]),
         ),
@@ -133,13 +123,7 @@ export default function AppWrapper(props: Location & typeof defaultLocation) {
           }
         }
       }
-      allFile(filter: { relativeDirectory: { eq: "files" } }) {
-        nodes {
-          absolutePath
-          publicURL
-        }
-      }
-      allProjectsJson {
+      allIndexJson {
         nodes {
           descr
           name
@@ -154,9 +138,18 @@ export default function AppWrapper(props: Location & typeof defaultLocation) {
           }
         }
       }
+      site {
+        pathPrefix
+      }
     }
   `);
-  return <App projects={formatProject(data)} location={props} />;
+  return (
+    <App
+      projects={formatProject(data)}
+      location={props}
+      pathPrefix={data.site.pathPrefix}
+    />
+  );
 }
 
 AppWrapper.defaultProps = defaultLocation;

@@ -106,7 +106,7 @@ exports.onCreateNode = async ({
   actions,
 }) => {
   const { createNode, createParentChildLink, createNodeField } = actions;
-  if (node.internal.type === 'ProjectsJson') {
+  if (node.internal.type === 'IndexJson') {
     return await Promise.all(
       node.versions.map(async (version) => {
         if (version.readme.url !== '') {
@@ -151,7 +151,7 @@ exports.onCreateNode = async ({
 exports.createPages = async ({ graphql, actions }) => {
   function formatProject(data) {
     return new Map(
-      data.allProjectsJson.nodes.map((project) => [
+      data.allIndexJson.nodes.map((project) => [
         project.name,
         project.versions.map((version) => version.name),
       ]),
@@ -160,7 +160,7 @@ exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions;
   const result = await graphql(`
     {
-      allProjectsJson {
+      allIndexJson {
         nodes {
           name
           versions {

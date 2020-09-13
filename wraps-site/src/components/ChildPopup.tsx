@@ -17,6 +17,8 @@ const TopDivider = styled(Divider)(compose(palette));
 
 const FullSizePaper = styled(Paper)(compose(sizing));
 
+const HeightContainer = styled(Container)(compose(sizing));
+
 export function ModalContainer(props: {
   children: React.ReactNode;
   closeHandler: () => void;
@@ -43,7 +45,11 @@ export function ModalContainer(props: {
           </ButtonBase>
         </Box>
         <TopDivider bgcolor="text.primary" />
-        <Container>{props.children}</Container>
+        <HeightContainer height="calc(100% - 49px)">
+          <Box overflow="auto" height="100%">
+            {props.children}
+          </Box>
+        </HeightContainer>
       </FullSizePaper>
     </Box>
   );
@@ -52,9 +58,7 @@ export function ModalContainer(props: {
 export const Render: React.FC<{ if_true: boolean }> = ({
   if_true,
   children,
-}) => {
-  return <div>{if_true ? children : null}</div>;
-};
+}) => <div>{if_true ? children : null}</div>;
 
 export default function ChildPopup(props: {
   children: React.ReactNode;
@@ -62,18 +66,12 @@ export default function ChildPopup(props: {
   open: boolean;
 }) {
   return (
-    <NoSsr>
-      <Modal
-        open={props.open}
-        onClose={props.closeHandler}
-        closeAfterTransition
-      >
-        <Fade in={props.open}>
-          <ModalContainer closeHandler={props.closeHandler}>
-            <Render if_true={props.open}>{props.children}</Render>
-          </ModalContainer>
-        </Fade>
-      </Modal>
-    </NoSsr>
+    <Modal open={props.open} onClose={props.closeHandler} closeAfterTransition>
+      <Fade in={props.open}>
+        <ModalContainer closeHandler={props.closeHandler}>
+          <Render if_true={props.open}>{props.children}</Render>
+        </ModalContainer>
+      </Fade>
+    </Modal>
   );
 }

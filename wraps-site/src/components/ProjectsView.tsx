@@ -1,5 +1,4 @@
 import React from 'react';
-import { ProjectsFormat } from './App';
 import {
   Table,
   TableBody,
@@ -14,13 +13,13 @@ import {
   Typography,
   NoSsr,
 } from '@material-ui/core';
+import ReactMarkdown from 'react-markdown';
+import { ProjectsFormat } from './App';
 import VersionsView from './VersionsView';
 import ChildPopup from './ChildPopup';
-import ReactMarkdown from 'react-markdown';
-import { fixSlashUrl } from './utils';
 
 export default class ProjectView extends React.Component<
-  { projects: ProjectsFormat },
+  { projects: ProjectsFormat; pathPrefix: string },
   { project: string | null }
 > {
   state: { project: string | null } = {
@@ -28,19 +27,10 @@ export default class ProjectView extends React.Component<
   };
 
   setProjectUrl(project: string | null) {
-    if (project === null) {
-      window.history.pushState(
-        {},
-        '',
-        new URL('..', window.location.href).toString(),
-      );
-    } else {
-      window.history.pushState(
-        {},
-        '',
-        new URL(project, window.location.href).toString(),
-      );
-    }
+    if (project === null)
+      window.history.pushState({}, '', this.props.pathPrefix);
+    else
+      window.history.pushState({}, '', `${this.props.pathPrefix}/${project}`);
   }
 
   setProjectAndCancel<E>(
@@ -50,14 +40,14 @@ export default class ProjectView extends React.Component<
     e.preventDefault();
     if (this.state.project !== project) {
       this.setProjectUrl(project);
-      this.setState({ project: project });
+      this.setState({ project });
     }
   }
 
   setProject(project: string | null) {
     if (this.state.project !== project) {
       this.setProjectUrl(project);
-      this.setState({ project: project });
+      this.setState({ project });
     }
   }
 
@@ -74,31 +64,27 @@ export default class ProjectView extends React.Component<
               </TableRow>
             </TableHead>
             <TableBody>
-              {Array.from(this.props.projects.values()).map((project) => {
-                return (
-                  <TableRow key={project.name}>
-                    <TableCell component="th" scope="row">
-                      <Button
-                        href={`./${project.name}`}
-                        variant="outlined"
-                        onClick={(e) =>
-                          this.setProjectAndCancel(e, project.name)
-                        }
-                      >
-                        {project.name}
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Typography>{project.versions.size}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography component="div">
-                        <ReactMarkdown source={project.descr} />
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {Array.from(this.props.projects.values()).map((project) => (
+                <TableRow key={project.name}>
+                  <TableCell component="th" scope="row">
+                    <Button
+                      href={`${this.props.pathPrefix}/${project.name}`}
+                      variant="outlined"
+                      onClick={(e) => this.setProjectAndCancel(e, project.name)}
+                    >
+                      {project.name}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{project.versions.size}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography component="div">
+                      <ReactMarkdown source={project.descr} />
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
@@ -108,7 +94,7 @@ export default class ProjectView extends React.Component<
         >
           <VersionsView
             project={this.props.projects.get(this.state.project)}
-            baseUrl={`./../${this.state.project}`}
+            pathPrefix={this.props.pathPrefix}
           />
         </ChildPopup>
       </div>

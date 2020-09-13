@@ -14,8 +14,6 @@ module.exports = {
     },
     'gatsby-transformer-json',
     'gatsby-theme-material-ui',
-    'gatsby-transformer-remark',
-    'gatsby-transformer-plaintext',
   ],
   pathPrefix: `/meson-wraps`,
 };

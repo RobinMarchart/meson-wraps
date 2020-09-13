@@ -1,5 +1,4 @@
 import React from 'react';
-import { ProjectInfo } from './App';
 import {
   Table,
   TableBody,
@@ -15,13 +14,13 @@ import {
 } from '@material-ui/core';
 import ReactMarkdown from 'react-markdown';
 import { OpenInNew } from '@material-ui/icons';
-import { fixSlashUrl } from './utils';
+import { ProjectInfo } from './App';
 import ChildPopup from './ChildPopup';
 import VersionView from './VersionView';
 
 export function VersionsTable(props: {
   project: ProjectInfo;
-  baseUrl: string;
+  pathPrefix: string;
   setVersion: (version: string) => void;
 }) {
   return (
@@ -34,68 +33,73 @@ export function VersionsTable(props: {
           </TableRow>
         </TableHead>
         <TableBody>
-          {Array.from(props.project.versions.values()).map((version) => {
-            return (
-              <TableRow key={version.name}>
-                <TableCell component="th" scope="row">
-                  <Button
-                    href={`${props.baseUrl}/${version.name}`}
-                    variant="outlined"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      props.setVersion(version.name);
-                    }}
-                  >
-                    {version.name}
-                  </Button>
-                  <IconButton
-                    href={`${props.baseUrl}/${version.name}`}
-                    target="_blank"
-                    size="small"
-                  >
-                    <OpenInNew />
-                  </IconButton>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    href={version.wrap_url}
-                    download={`${props.project.name}.wrap`}
-                  >
-                    Download
-                  </Button>
-                  <IconButton
-                    href={version.wrap_url}
-                    target="_blank"
-                    size="small"
-                  >
-                    <OpenInNew />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+          {Array.from(props.project.versions.values()).map((version) => (
+            <TableRow key={version.name}>
+              <TableCell component="th" scope="row">
+                <Button
+                  href={`${props.pathPrefix}/${version.name}`}
+                  variant="outlined"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    props.setVersion(version.name);
+                  }}
+                >
+                  {version.name}
+                </Button>
+                <IconButton
+                  href={`${props.pathPrefix}/${version.name}`}
+                  target="_blank"
+                  size="small"
+                >
+                  <OpenInNew />
+                </IconButton>
+              </TableCell>
+              <TableCell>
+                <Button
+                  href={version.wrap_url}
+                  download={`${props.project.name}.wrap`}
+                >
+                  Download
+                </Button>
+                <IconButton
+                  href={version.wrap_url}
+                  target="_blank"
+                  size="small"
+                >
+                  <OpenInNew />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>
   );
 }
-const VersionsViewDefaultProps = {
-  baseUrl: '.',
-};
 
 export default class VersionsView extends React.Component<
-  typeof VersionsViewDefaultProps & { project: ProjectInfo; baseUrl: string },
+  { project: ProjectInfo; pathPrefix: string },
   { version: string | null }
 > {
-  static defaultProps = VersionsViewDefaultProps;
   state: { version: string | null } = {
     version: null,
   };
+
   setVersion(version: string | null) {
-    if (version == null) window.history.pushState({}, '', this.props.baseUrl);
-    else window.history.pushState({}, '', `${this.props.baseUrl}/${version}`);
-    this.setState({ version: version });
+    if (version == null) {
+    { history.pushState(
+      {},
+      ``,
+      `${this.props.pathPrefix}/${this.props.project.name}`,
+    ); } else { window.history.pushState(
+      {},
+      ``,
+      `${this.props.pathPrefix}/${this.props.project.name}/${version}`,
+    );
+    }
+    this.setState({ version });
   }
+
   render() {
     return (
       <Box>
@@ -119,7 +123,7 @@ export default class VersionsView extends React.Component<
         <Paper>
           <VersionsTable
             project={this.props.project}
-            baseUrl={this.props.baseUrl}
+            pathPrefix={this.props.pathPrefix}
             setVersion={(version) => this.setVersion(version)}
           />
         </Paper>

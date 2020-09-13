@@ -1,5 +1,4 @@
 import React from 'react';
-import { VersionInfo, ProjectInfo } from './App';
 import {
   Box,
   Paper,
@@ -10,6 +9,7 @@ import {
 } from '@material-ui/core';
 import ReactMarkdown from 'react-markdown';
 import { OpenInNew } from '@material-ui/icons';
+import { VersionInfo, ProjectInfo } from './App';
 
 const defaultVersionViewProps = {
   ssr: false,
@@ -85,7 +85,7 @@ export default function VersionView(
         </Box>
       </Paper>
       <Paper>
-        <Box paddingBottom="30px"></Box>
+        <Box paddingBottom="30px" />
       </Paper>
     </Box>
   );
