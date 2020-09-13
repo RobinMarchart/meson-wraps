@@ -86,17 +86,19 @@ export default class VersionsView extends React.Component<
   };
 
   setVersion(version: string | null) {
-    if (version == null) {
-    { history.pushState(
-      {},
-      ``,
-      `${this.props.pathPrefix}/${this.props.project.name}`,
-    ); } else { window.history.pushState(
-      {},
-      ``,
-      `${this.props.pathPrefix}/${this.props.project.name}/${version}`,
-    );
-    }
+    if (version == null)
+      history.pushState(
+        {},
+        ``,
+        `${this.props.pathPrefix}/${this.props.project.name}`,
+      );
+    else
+      window.history.pushState(
+        {},
+        ``,
+        `${this.props.pathPrefix}/${this.props.project.name}/${version}`,
+      );
+
     this.setState({ version });
   }
 
