@@ -38,6 +38,9 @@ type QueryData = {
       }[];
     }[];
   };
+  site: {
+    pathPrefix: string;
+  };
 };
 export type VersionInfo = {
   name: string;
@@ -93,7 +96,7 @@ function formatProject(data: QueryData): ProjectsFormat {
 }
 
 class App extends React.Component<
-  { projects: ProjectsFormat; location: Location },
+  { projects: ProjectsFormat; location: Location; pathPrefix: string },
   {}
 > {
   render() {
@@ -103,7 +106,11 @@ class App extends React.Component<
           project={this.props.location.project}
           version={this.props.location.version}
         />
-        <Body projects={this.props.projects} location={this.props.location} />
+        <Body
+          projects={this.props.projects}
+          location={this.props.location}
+          pathPrefix={this.props.pathPrefix}
+        />
       </div>
     );
   }
@@ -143,6 +150,7 @@ export default function AppWrapper(props: Location & typeof defaultLocation) {
       }
     }
   `);
+  console.log(data);
   return (
     <App
       projects={formatProject(data)}

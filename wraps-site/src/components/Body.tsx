@@ -39,7 +39,7 @@ export default function Body(props: {
       <SelectBody
         projects={props.projects}
         location={props.location}
-        pathPrefix={props.pathPrefix !== undefined ? props.pathPrefix : ''}
+        pathPrefix={props.pathPrefix}
       />
     </Container>
   );
