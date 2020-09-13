@@ -27,7 +27,7 @@ gen-site:
         policy: pull-push
         key: node_modules
         paths:
-            - wraps-site/node-modules
+            - wraps-site/node_modules
 
 pages:
     stage: deploy
