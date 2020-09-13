@@ -6,7 +6,7 @@ stages:
 gen-wraps:
     stage: prepare
     image: python:latest
-    script: ./gen.py wraps wraps_gen https://robinmarchart.gitlab.io/meson-wraps/wraps
+    script: ./gen.py wraps wraps_gen https://robinmarchart.gitlab.io/meson-wraps/wraps/
     artifacts:
         paths:
             - wraps_gen
