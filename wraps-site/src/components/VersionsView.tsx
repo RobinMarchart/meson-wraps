@@ -37,7 +37,7 @@ export function VersionsTable(props: {
             <TableRow key={version.name}>
               <TableCell component="th" scope="row">
                 <Button
-                  href={`${props.pathPrefix}/${version.name}`}
+                  href={`${props.pathPrefix}/${props.project.name}/${version.name}`}
                   variant="outlined"
                   onClick={(e) => {
                     e.preventDefault();
@@ -47,7 +47,7 @@ export function VersionsTable(props: {
                   {version.name}
                 </Button>
                 <IconButton
-                  href={`${props.pathPrefix}/${version.name}`}
+                  href={`${props.pathPrefix}/${props.project.name}/${version.name}`}
                   target="_blank"
                   size="small"
                 >
