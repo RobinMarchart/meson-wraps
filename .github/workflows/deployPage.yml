@@ -42,25 +42,10 @@ jobs:
         with:
           name: Site
           path: site
-
-  
-  deploy:
-    name: Deploy site
-    needs: build
-    runs-on: ubuntu-latest
-    if: ${{ github.ref == 'master' }}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: Download site
-        uses: actions/download-artifact@v2
-        with:
-          name: site
-          path: public
       - name: Deploy to github page
         uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: gh-pages
-          build_dir: public
+          build_dir: site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
