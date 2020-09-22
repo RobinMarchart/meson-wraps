@@ -48,7 +48,7 @@ jobs:
     name: Deploy site
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'master'
+    if: ${{ github.ref == 'master' }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
