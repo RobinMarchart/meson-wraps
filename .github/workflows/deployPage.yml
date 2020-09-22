@@ -1,0 +1,62 @@
+name: "Deploy Page"
+on:
+  push:
+    branches: [ master ]
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout code
+      - uses: actions/setup-python@v2
+        name: Setup python 3.8
+        with:
+          python-version: 3.8
+      - name: Generate wraps
+        run: ./gen.py wraps wraps_gen https://robinmarchart.github.io/meson-wraps/wraps
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: wraps-site/node_modules
+          key: node_modules
+      - name: Install dependencies
+        run: cd wraps-site;yarn --frozen-lockfile
+      - name: Build site
+        run: cd wraps-site;yarn build --prefix-paths
+      - name: Prepare site dir
+        run: |
+          mkdir site;
+          mv wraps-site/public/* site/
+          mv wraps_gen site/wraps
+      - name: Save site artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Site
+          path: site
+
+  
+  deploy:
+    name: Deploy site
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'master'
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Download site
+        uses: actions/download-artifact@v2
+        with:
+          name: site
+          path: public
+      - name: Deploy to github page
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: public
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
