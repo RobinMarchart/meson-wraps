@@ -26,6 +26,10 @@ jobs:
           key: node_modules
       - name: Install dependencies
         run: cd wraps-site;yarn --frozen-lockfile
+      - name: Install pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install pandoc
       - name: Build site
         run: cd wraps-site;yarn build --prefix-paths
       - name: Prepare site dir
