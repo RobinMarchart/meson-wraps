@@ -1,5 +1,6 @@
 import React from 'react';
-import { AppBar, Toolbar, Breadcrumbs, Typography, Box } from '@material-ui/core';
+import { AppBar, Toolbar, Breadcrumbs, Typography, Box, IconButton } from '@material-ui/core';
+import {GitHub} from '@material-ui/icons';
 import { Link } from 'gatsby-theme-material-ui';
 import { NavigateNext } from '@material-ui/icons';
 import { Location } from './App';
@@ -50,7 +51,7 @@ export default function Title(props: Location) {
     return (
         <AppBar position="sticky">
             <Toolbar>
-                <Box display="flex" justifyContent="space-between" width="100%" flexWrap="wrap-reverse" color="text.primary">
+                <Box display="flex" justifyContent="space-between" width="100%" flexWrap="wrap-reverse" color="text.primary" alignContent="space-around" alignItems="center">
                     <Box padding="7px">
                         {createBreadcrumbs(props)}
                     </Box>
@@ -58,8 +59,10 @@ export default function Title(props: Location) {
                         <Typography variant="h5">Meson wraps collection</Typography>
                     </Box>
                     <Box padding="7px">
-                        source code
-          </Box>
+                      <IconButton color="inherit" href="https://github.com/robinmarchart/meson-wraps/" target="_blank">
+                        <GitHub color="inherit"/>
+                      </IconButton>
+                    </Box>
                 </Box>
             </Toolbar>
         </AppBar>
