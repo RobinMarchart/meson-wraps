@@ -17,10 +17,10 @@ import { OpenInNew } from '@material-ui/icons';
 import { ProjectInfo } from './App';
 import ChildPopup from './ChildPopup';
 import VersionView from './VersionView';
+import { withPrefix } from 'gatsby';
 
 export function VersionsTable(props: {
   project: ProjectInfo;
-  pathPrefix: string;
   setVersion: (version: string) => void;
 }) {
   return (
@@ -37,7 +37,7 @@ export function VersionsTable(props: {
             <TableRow key={version.name}>
               <TableCell component="th" scope="row">
                 <Button
-                  href={`${props.pathPrefix}/${props.project.name}/${version.name}`}
+                  href={withPrefix(`/${props.project.name}/${version.name}`)}
                   variant="outlined"
                   onClick={(e) => {
                     e.preventDefault();
@@ -47,7 +47,7 @@ export function VersionsTable(props: {
                   {version.name}
                 </Button>
                 <IconButton
-                  href={`${props.pathPrefix}/${props.project.name}/${version.name}`}
+                  href={ withPrefix(`${props.project.name}/${version.name}`)}
                   target="_blank"
                   size="small"
                 >
@@ -78,7 +78,7 @@ export function VersionsTable(props: {
 }
 
 export default class VersionsView extends React.Component<
-  { project: ProjectInfo; pathPrefix: string },
+  { project: ProjectInfo;},
   { version: string | null }
 > {
   state: { version: string | null } = {
@@ -90,13 +90,13 @@ export default class VersionsView extends React.Component<
       history.pushState(
         {},
         ``,
-        `${this.props.pathPrefix}/${this.props.project.name}`,
+        withPrefix(`/${this.props.project.name}`),
       );
     else
       window.history.pushState(
         {},
         ``,
-        `${this.props.pathPrefix}/${this.props.project.name}/${version}`,
+        withPrefix(`/${this.props.project.name}/${version}`),
       );
 
     this.setState({ version });
@@ -125,7 +125,6 @@ export default class VersionsView extends React.Component<
         <Paper>
           <VersionsTable
             project={this.props.project}
-            pathPrefix={this.props.pathPrefix}
             setVersion={(version) => this.setVersion(version)}
           />
         </Paper>

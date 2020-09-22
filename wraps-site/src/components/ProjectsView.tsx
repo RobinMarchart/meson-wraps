@@ -17,9 +17,10 @@ import ReactMarkdown from 'react-markdown';
 import { ProjectsFormat } from './App';
 import VersionsView from './VersionsView';
 import ChildPopup from './ChildPopup';
+import { withPrefix } from 'gatsby';
 
 export default class ProjectView extends React.Component<
-  { projects: ProjectsFormat; pathPrefix: string },
+  { projects: ProjectsFormat; },
   { project: string | null }
 > {
   state: { project: string | null } = {
@@ -28,9 +29,9 @@ export default class ProjectView extends React.Component<
 
   setProjectUrl(project: string | null) {
     if (project === null)
-      window.history.pushState({}, '', this.props.pathPrefix);
+      window.history.pushState({}, '', withPrefix('/'));
     else
-      window.history.pushState({}, '', `${this.props.pathPrefix}/${project}`);
+      window.history.pushState({}, '', withPrefix(`/${project}`));
   }
 
   setProjectAndCancel<E>(
@@ -68,7 +69,7 @@ export default class ProjectView extends React.Component<
                 <TableRow key={project.name}>
                   <TableCell component="th" scope="row">
                     <Button
-                      href={`${this.props.pathPrefix}/${project.name}`}
+                      href={withPrefix(`/${project.name}`)}
                       variant="outlined"
                       onClick={(e) => this.setProjectAndCancel(e, project.name)}
                     >
@@ -94,7 +95,6 @@ export default class ProjectView extends React.Component<
         >
           <VersionsView
             project={this.props.projects.get(this.state.project)}
-            pathPrefix={this.props.pathPrefix}
           />
         </ChildPopup>
       </div>

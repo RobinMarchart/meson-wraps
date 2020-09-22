@@ -23,7 +23,7 @@ type QueryData = {
       };
     }[];
   };
-  allProjectsJson: {
+  allIndexJson: {
     nodes: {
       descr: string;
       name: string;
@@ -37,9 +37,6 @@ type QueryData = {
         };
       }[];
     }[];
-  };
-  site: {
-    pathPrefix: string;
   };
 };
 export type VersionInfo = {
@@ -96,7 +93,7 @@ function formatProject(data: QueryData): ProjectsFormat {
 }
 
 class App extends React.Component<
-  { projects: ProjectsFormat; location: Location; pathPrefix: string },
+  { projects: ProjectsFormat; location: Location;},
   {}
 > {
   render() {
@@ -109,7 +106,6 @@ class App extends React.Component<
         <Body
           projects={this.props.projects}
           location={this.props.location}
-          pathPrefix={this.props.pathPrefix}
         />
       </div>
     );
@@ -145,9 +141,6 @@ export default function AppWrapper(props: Location & typeof defaultLocation) {
           }
         }
       }
-      site {
-        pathPrefix
-      }
     }
   `);
   console.log(data);
@@ -155,7 +148,6 @@ export default function AppWrapper(props: Location & typeof defaultLocation) {
     <App
       projects={formatProject(data)}
       location={props}
-      pathPrefix={data.site.pathPrefix}
     />
   );
 }

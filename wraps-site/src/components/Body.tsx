@@ -8,11 +8,10 @@ import VersionView from './VersionView';
 function SelectBody(props: {
   projects: ProjectsFormat;
   location: Location;
-  pathPrefix: string;
 }) {
   if (props.location.project == null) {
     return (
-      <ProjectsView projects={props.projects} pathPrefix={props.pathPrefix} />
+      <ProjectsView projects={props.projects} />
     );
   }
   if (props.location.version == null) {

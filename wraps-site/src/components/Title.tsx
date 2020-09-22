@@ -3,7 +3,6 @@ import { AppBar, Toolbar, Breadcrumbs, Typography } from '@material-ui/core';
 import { Link } from 'gatsby-theme-material-ui';
 import { NavigateNext } from '@material-ui/icons';
 import { Location } from './App';
-
 function createBreadcrumbs(loc: Location) {
   if (loc.project == null) {
     return (
