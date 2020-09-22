@@ -21,7 +21,6 @@ function SelectBody(props: {
   }
   return (
     <VersionView
-      ssr
       project={props.projects.get(props.location.project)}
       version={props.location.version}
     />

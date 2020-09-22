@@ -18,7 +18,7 @@ type QueryData = {
     nodes: {
       source_url: string;
       parent: {
-        publicUrl: string;
+        publicURL: string;
         extension: 'md' | 'txt';
       };
     }[];
@@ -76,7 +76,7 @@ function formatProject(data: QueryData): ProjectsFormat {
                 href: version.readme.href,
                 text_url: data.allReadmeRelationHelper.nodes.find(
                   (x) => x.source_url === version.readme.url,
-                ).parent.publicUrl,
+                ).parent.publicURL,
                 md:
                   data.allReadmeRelationHelper.nodes.find(
                     (x) => x.source_url === version.readme.url,
