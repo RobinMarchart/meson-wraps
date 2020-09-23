@@ -16,7 +16,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: 12.x
+          node-version: 14.12
       - name: Cache node_modules
         uses: actions/cache@v2
         with:
@@ -32,6 +32,7 @@ jobs:
         run: cd wraps-site;yarn build --prefix-paths
         env:
           BASE_URL: https://robinmarchart.github.io/meson-wraps/
+          DONT_WATCH: 1
       - name: Prepare site dir
         run: |
           mkdir site;
