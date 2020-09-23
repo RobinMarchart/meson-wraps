@@ -33,20 +33,15 @@ jobs:
         env:
           BASE_URL: https://robinmarchart.github.io/meson-wraps/
           DONT_WATCH: 1
-      - name: Prepare site dir
-        run: |
-          mkdir site;
-          mv wraps-site/public/* site/
-          mv wraps_gen site/wraps
       - name: Save site artifact
         uses: actions/upload-artifact@v2
         with:
           name: Site
-          path: site
+          path: wraps-site/public
       - name: Deploy to github page
         uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: gh-pages
-          build_dir: site
+          build_dir: wraps-site/public
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
