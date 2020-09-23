@@ -8,12 +8,15 @@ import os
 import hashlib
 import typing
 import urllib.parse
-
+import logging
+import logging.config
 
 class Readme:
-    href: str = ""
-    url: str = ""
+    def __init__(self):
+        self.href:str=""
+        self.url:str=""
 
+    @staticmethod
     def from_dict(dictionary) -> "Readme":
         readme: Readme = Readme()
         if isinstance(dictionary, dict):
@@ -28,12 +31,16 @@ class Readme:
             self.href = self.url
         return {"href": self.href, "url": self.url}
 
+    def __repr__(self):
+        return repr(self.to_dict())
+
 
 class Version:
-    name: str = ""
-    wrap: str = ""
-    patch: str = ""
-    readme: Readme = Readme()
+    def __init__(self):
+        self.name:str=""
+        self.wrap:str=""
+        self.patch:str=""
+        self.readme:Readme=Readme()
 
     @staticmethod
     def from_dict(dictionary) -> "Version":
@@ -57,11 +64,15 @@ class Version:
             "readme": self.readme.to_dict(),
         }
 
+    def __repr__(self):
+        return repr(self.to_dict())
+
 
 class Project:
-    name: str = ""
-    descr: str = ""
-    versions: typing.List[Version] = []
+    def __init__(self,name:str,descr:str,versions:typing.List[Version]):
+        self.name:str=name
+        self.descr:str=descr
+        self.versions:typing.List[Version]=versions
 
     def to_dict(self) -> dict:
         return {
@@ -70,11 +81,15 @@ class Project:
             "versions": [version.to_dict() for version in self.versions],
         }
 
+    def __repr__(self):
+        return repr(self.to_dict())
+
 
 class ProjectTemplate:
-    name: str = ""
-    descr: str = ""
-    readme: Readme = Readme()
+    def __init__(self):
+        self.name:str=""
+        self.descr:str=""
+        self.readme:Readme=Readme()
 
     @staticmethod
     def from_dict(dictionary) -> "ProjectTemplate":
@@ -93,14 +108,21 @@ class ProjectTemplate:
             version.readme.href = self.readme.href.format(version=version.name)
         if version.readme.url == "":
             version.readme.url = self.readme.url.format(version=version.name)
+        logging.info("Finished generating version {0}".format(version.name))
+        logging.debug("Generated version: {0!s}\n".format(version))
         return version
 
-    def to_project(self, versions: typing.List[Version]):
-        proj: Project = Project()
-        proj.name = self.name
-        proj.descr = self.descr
-        proj.versions = [self.__processVersion(v) for v in versions]
-        return proj
+    def to_project(self, versions: typing.Iterable[Version]):
+        return Project(self.name,self.descr,[self.__processVersion(v) for v in versions])
+
+    def __repr__(self):
+        return repr(
+            {
+                "name": self.name,
+                "descr": self.descr,
+                "readme": self.readme,
+            }
+        )
 
 
 def to_ex_dir(p: str) -> pathlib.Path:
@@ -121,7 +143,7 @@ def to_opt_dir(p: str) -> pathlib.Path:
 
 
 def gen_version_dir(
-        version_dir: pathlib.Path, out_dir: pathlib.Path, project_name: str,url_base:str
+    version_dir: pathlib.Path, out_dir: pathlib.Path, project_name: str, url_base: str
 ) -> Version:
     macros: typing.Dict[str, str] = {}
 
@@ -131,8 +153,9 @@ def gen_version_dir(
             version = Version.from_dict(json.load(version_f))
     if version.name == "":
         version.name = version_dir.name
-    out=out_dir/project_name/version.name
-    out.mkdir(parents=True,exist_ok=True)
+    logging.info("Generating version {0}".format(version.name))
+    out = out_dir / project_name / version.name
+    out.mkdir(parents=True, exist_ok=True)
     if version.patch == "":
         p_d = list(
             itertools.filterfalse(
@@ -148,8 +171,13 @@ def gen_version_dir(
                 "gztar",
                 p_d[0],
             )
-            version.patch = urllib.parse.urljoin(url_base, "{project}/{version}/patch-{project}-{version}.tar.gz".format(project=project_name,version=version.name))
-            macros["patch_url"]=version.patch
+            version.patch = urllib.parse.urljoin(
+                url_base,
+                "{project}/{version}/patch-{project}-{version}.tar.gz".format(
+                    project=project_name, version=version.name
+                ),
+            )
+            macros["patch_url"] = version.patch
             with open(patch_file, "rb") as patch_f:
                 macros["patch_hash"] = hashlib.sha256(patch_f.read()).hexdigest()
 
@@ -162,48 +190,71 @@ def gen_version_dir(
         with path.open("w") as out_f:
             with (version_dir / "wrap.ini").open() as in_f:
                 out_f.write(in_f.read().format_map(macros))
-        version.wrap = urllib.parse.urljoin(url_base, "{project}/{version}/{project}-{version}.wrap".format(
-            project=project_name, version=version.name
-        ))
+        version.wrap = urllib.parse.urljoin(
+            url_base,
+            "{project}/{version}/{project}-{version}.wrap".format(
+                project=project_name, version=version.name
+            ),
+        )
+    logging.debug("version template: {0!s}\n".format(version))
     return version
 
 
-def gen_project_dir(project_dir: pathlib.Path, output_dir: pathlib.Path,url_base:str) -> Project:
+def gen_project_dir(
+    project_dir: pathlib.Path, output_dir: pathlib.Path, url_base: str
+) -> Project:
     project_template: ProjectTemplate = ProjectTemplate()
     if (project_dir / "project.json").is_file():
         with (project_dir / "project.json").open() as project_f:
             project_template = ProjectTemplate.from_dict(json.load(project_f))
     if project_template.name == "":
         project_template.name = project_dir.name
-    dir_content = project_dir.iterdir()
-    versions = itertools.filterfalse(lambda d_cont: not d_cont.is_dir(), dir_content)
-    versions = [
-        gen_version_dir(pro, output_dir, project_template.name,url_base) for pro in versions
-    ]
-    return project_template.to_project(versions)
+    logging.info("Generating project {0}".format(project_template.name))
+    logging.debug("Project template: {0!s}\n".format(project_template))
+    dir_content: typing.Iterable[pathlib.Path] = itertools.filterfalse(lambda d_cont: not d_cont.is_dir(), project_dir.iterdir())
+    versions: typing.Iterable[Version] = (
+        gen_version_dir(pro, output_dir, project_template.name, url_base)
+        for pro in dir_content
+    )
+    project:Project=project_template.to_project(versions)
+    logging.info("Finished generating project {0}".format(project.name))
+    logging.debug("Generated project: {0!s}\n".format(project))
+    return project;
 
 
-def gen_root_dir(input: pathlib.Path, output: pathlib.Path,url_base:str):
-    root_index_file = output / "index.json"
-    files_output_dir = output
-    files_output_dir.mkdir(exist_ok=True)
-    dir_content = input.iterdir()
-    projects = itertools.filterfalse(lambda d_cont: not d_cont.is_dir(), dir_content)
-    projects = [gen_project_dir(pro, files_output_dir,url_base) for pro in projects]
-    with root_index_file.open("w") as out_f:
+def gen_root_dir(input: pathlib.Path, output: pathlib.Path, url_base: str):
+    output.mkdir(exist_ok=True)
+    dir_content: typing.Iterable[pathlib.Path] = itertools.filterfalse(
+        lambda d_cont: not d_cont.is_dir(), input.iterdir()
+    )
+    projects: typing.Iterable[Project] = (
+        gen_project_dir(pro, output, url_base) for pro in dir_content
+    )
+    with (output / "index.json").open("w") as out_f:
         json.dump(
             [project.to_dict() for project in projects], out_f, indent=4, sort_keys=True
         )
+    logging.info("Finished generating projects")
 
+class LoggerConfigAction(argparse.Action):
+    def __init__(self, option_strings, dest):
+        super().__init__(option_strings, dest,required=False)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        logging.config.fileConfig(values);
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir", type=to_ex_dir)
     parser.add_argument("output_dir", type=to_opt_dir)
     parser.add_argument("url_base")
+    parser.add_argument("--logger-config",action=LoggerConfigAction)
     args = parser.parse_args()
-    gen_root_dir(args.input_dir.resolve(True), args.output_dir.resolve(True),args.url_base)
+    gen_root_dir(
+        args.input_dir.resolve(True), args.output_dir.resolve(True), args.url_base
+    )
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     main()

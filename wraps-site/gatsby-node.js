@@ -53,7 +53,7 @@ async function pandocToMd(input_format, input_stream) {
   return await bufferPromise;
 }
 
-async function getReadme(url, parentNode, getCache, createNode, createNodeId) {
+async function getReadme(url, parentNode, getCache, createNode, createNodeId,name) {
   let ext = path.extname(url.pathname);
   switch (ext) {
     case '':
@@ -66,6 +66,7 @@ async function getReadme(url, parentNode, getCache, createNode, createNodeId) {
         createNode,
         createNodeId,
         ext: '.txt',
+        name:name,
       });
     }
     case '.md': {
@@ -77,6 +78,7 @@ async function getReadme(url, parentNode, getCache, createNode, createNodeId) {
         createNode,
         createNodeId,
         ext: '.md',
+        name: name,
       });
     }
     case '.rst': {
@@ -91,6 +93,7 @@ async function getReadme(url, parentNode, getCache, createNode, createNodeId) {
         createNode,
         createNodeId,
         ext: '.md',
+        name:name,
       });
     }
     default:
@@ -106,7 +109,7 @@ exports.onCreateNode = async ({
   actions,
 }) => {
   const { createNode, createParentChildLink, createNodeField } = actions;
-  if (node.internal.type === 'IndexJson') {
+  if (node.internal.type === 'WrapsIndexJson') {
     return await Promise.all(
       node.versions.map(async (version) => {
         if (version.readme.url !== '') {
@@ -118,6 +121,7 @@ exports.onCreateNode = async ({
               getCache,
               createNode,
               createNodeId,
+              `${node.name}-${version.name}`,
             );
             //createParentChildLink({ parent: relationNode, child: childNode });
             let relationNode = await createNode({
@@ -151,7 +155,7 @@ exports.onCreateNode = async ({
 exports.createPages = async ({ graphql, actions }) => {
   function formatProject(data) {
     return new Map(
-      data.allIndexJson.nodes.map((project) => [
+      data.allWrapsIndexJson.nodes.map((project) => [
         project.name,
         project.versions.map((version) => version.name),
       ]),
@@ -160,7 +164,7 @@ exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions;
   const result = await graphql(`
     {
-      allIndexJson {
+      allWrapsIndexJson {
         nodes {
           name
           versions {

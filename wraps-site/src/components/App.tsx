@@ -23,7 +23,7 @@ type QueryData = {
       };
     }[];
   };
-  allIndexJson: {
+  allWrapsIndexJson: {
     nodes: {
       descr: string;
       name: string;
@@ -62,7 +62,7 @@ export type ProjectsFormat = Map<string, ProjectInfo>;
 
 function formatProject(data: QueryData): ProjectsFormat {
   return new Map(
-    data.allIndexJson.nodes.map((project) => [
+    data.allWrapsIndexJson.nodes.map((project) => [
       project.name,
       {
         name: project.name,
@@ -126,7 +126,7 @@ export default function AppWrapper(props: Location & typeof defaultLocation) {
           }
         }
       }
-      allIndexJson {
+      allWrapsIndexJson {
         nodes {
           descr
           name

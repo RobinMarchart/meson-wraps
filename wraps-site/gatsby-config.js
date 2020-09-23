@@ -6,14 +6,16 @@ module.exports = {
   // don't need to define it here (just if you need to change the options)
   plugins: [
     {
-      resolve: 'gatsby-source-filesystem',
+      resolve: `gatsby-source-filesystem`,
       options: {
-        name: 'wraps',
-        path: `${__dirname}/../wraps_gen/`,
+        name: `data`,
+        path: `${__dirname}/`,
+        ignore: [`**`], // ignore files starting with a dot
       },
     },
     'gatsby-transformer-json',
     'gatsby-theme-material-ui',
+    'gatsby-source-wraps-gen',
   ],
   pathPrefix: `/meson-wraps`,
 };

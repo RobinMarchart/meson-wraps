@@ -13,8 +13,6 @@ jobs:
         name: Setup python 3.8
         with:
           python-version: 3.8
-      - name: Generate wraps
-        run: ./gen.py wraps wraps_gen https://robinmarchart.github.io/meson-wraps/wraps/
       - name: Setup node
         uses: actions/setup-node@v1
         with:
@@ -32,6 +30,8 @@ jobs:
           sudo apt-get -y install pandoc
       - name: Build site
         run: cd wraps-site;yarn build --prefix-paths
+        env:
+          BASE_URL: https://robinmarchart.github.io/meson-wraps/
       - name: Prepare site dir
         run: |
           mkdir site;
