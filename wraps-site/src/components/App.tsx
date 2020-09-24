@@ -143,7 +143,6 @@ export default function AppWrapper(props: Location & typeof defaultLocation) {
       }
     }
   `);
-  console.log(data);
   return (
     <App
       projects={formatProject(data)}

@@ -1,6 +1,8 @@
 module.exports = {
   siteMetadata: {
-    title: 'personal Meson wraps collection',
+    title: 'Meson wraps',
+    description: 'Personal meson wraps collection',
+    author: 'Robin Marchart',
   },
   // Since `gatsby-plugin-typescript` is automatically included in Gatsby you
   // don't need to define it here (just if you need to change the options)
@@ -16,6 +18,7 @@ module.exports = {
     'gatsby-transformer-json',
     'gatsby-theme-material-ui',
     'gatsby-source-wraps-gen',
+    'gatsby-plugin-react-helmet'
   ],
   pathPrefix: `/meson-wraps`,
 };

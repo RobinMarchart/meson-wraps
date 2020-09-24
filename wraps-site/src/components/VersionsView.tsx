@@ -19,6 +19,12 @@ import ChildPopup from './ChildPopup';
 import VersionView from './VersionView';
 import { withPrefix } from 'gatsby';
 
+export function ProjectDescrWrapper(props: {children:React.ReactNode}){
+  return <Box fontSize="1rem" fontFamily="Roboto Helvetica Arial sans-serif" fontWeight="400" lineHeight="1.75" letterSpacing="0.00938em" display="block" >
+    {props.children}
+  </Box>
+}
+
 export function VersionsTable(props: {
   project: ProjectInfo;
   setVersion: (version: string) => void;
@@ -50,6 +56,7 @@ export function VersionsTable(props: {
                   href={ withPrefix(`${props.project.name}/${version.name}`)}
                   target="_blank"
                   size="small"
+                  aria-label={`open version ${version.name} in new tab`}
                 >
                   <OpenInNew />
                 </IconButton>
@@ -57,7 +64,7 @@ export function VersionsTable(props: {
               <TableCell>
                 <Button
                   href={version.wrap_url}
-                  download={`${props.project.name}.wrap`}
+                  download={`${props.project.name}-${version.name}.wrap`}
                 >
                   Download
                 </Button>
@@ -65,6 +72,7 @@ export function VersionsTable(props: {
                   href={version.wrap_url}
                   target="_blank"
                   size="small"
+                  aria-label={`open wrap file version ${version.name} in new tab`}
                 >
                   <OpenInNew />
                 </IconButton>
@@ -116,9 +124,9 @@ export default class VersionsView extends React.Component<
           >
             <Typography variant="h3">{this.props.project.name}</Typography>
             <Box marginLeft="30px" marginRight="30px">
-              <Typography variant="subtitle1">
+              <ProjectDescrWrapper>
                 <ReactMarkdown source={this.props.project.descr} />
-              </Typography>
+              </ProjectDescrWrapper>
             </Box>
           </Box>
         </Paper>

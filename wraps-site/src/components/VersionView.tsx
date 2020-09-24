@@ -9,8 +9,9 @@ import {
 } from '@material-ui/core';
 import ReactMarkdown from 'react-markdown';
 import { OpenInNew, SentimentVeryDissatisfied } from '@material-ui/icons';
-import { VersionInfo, ProjectInfo } from './App';
+import { ProjectInfo } from './App';
 import ReadmeViewer from './ReadmeViewer';
+import {ProjectDescrWrapper} from './VersionsView';
 
 export default function VersionView(
     props: {
@@ -33,9 +34,9 @@ export default function VersionView(
                         {`${props.project.name} - ${props.version}`}
                     </Typography>
                     <Box marginLeft="30px" marginRight="30px">
-                        <Typography variant="subtitle1">
+                        <ProjectDescrWrapper>
                             <ReactMarkdown source={props.project.descr} />
-                        </Typography>
+                        </ProjectDescrWrapper>
                     </Box>
                 </Box>
             </Paper>
@@ -53,6 +54,7 @@ export default function VersionView(
                                         variant="contained"
                                         color="secondary"
                                         href={props.project.versions.get(props.version).wrap_url}
+                                        download={`${props.project.name}-${props.version}.wrap`}
                                     >
                                         Download Wrap File
                   </Button>
@@ -60,6 +62,7 @@ export default function VersionView(
                                         size="small"
                                         color="secondary"
                                         href={props.project.versions.get(props.version).wrap_url}
+                                        aria-label={`open wrap file version ${props.version} in new tab`}
                                     >
                                         <OpenInNew />
                                     </IconButton>
