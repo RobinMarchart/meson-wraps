@@ -19,7 +19,8 @@ fmt_lib = library('fmt',
         'src/os.cc'
     ],
     cpp_args : fmt_private_cpp_args,
-    include_directories : fmt_inc
+    include_directories : fmt_inc,
+    install:get_option('install')
 )
 
 fmt_dep = declare_dependency(
