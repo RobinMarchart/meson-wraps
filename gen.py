@@ -169,7 +169,8 @@ def gen_version_dir(
                     project=project_name, version=version.name
                 ),
                 "gztar",
-                p_d[0],
+                root_dir=version_dir,
+                base_dir=p_d[0].name,
             )
             version.patch = urllib.parse.urljoin(
                 url_base,
