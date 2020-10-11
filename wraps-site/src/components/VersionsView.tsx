@@ -20,7 +20,7 @@ import VersionView from './VersionView';
 import { withPrefix } from 'gatsby';
 
 export function ProjectDescrWrapper(props: {children:React.ReactNode}){
-  return <Box fontSize="1rem" fontFamily="Roboto Helvetica Arial sans-serif" fontWeight="400" lineHeight="1.75" letterSpacing="0.00938em" display="block" >
+  return <Box fontSize="1rem" fontFamily="'Fira Sans'" fontWeight="400" lineHeight="1.75" letterSpacing="0.00938em" display="block" >
     {props.children}
   </Box>
 }

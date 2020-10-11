@@ -5700,6 +5700,10 @@ findup-sync@^3.0.0:
     micromatch "^3.0.4"
     resolve-dir "^1.0.1"
 
+"fira@https://github.com/mozilla/Fira.git":
+  version "0.0.0"
+  resolved "https://github.com/mozilla/Fira.git#fd8c8c0a3d353cd99e8ca1662942d165e6961407"
+
 flat-cache@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/flat-cache/-/flat-cache-2.0.1.tgz#5d296d6f04bda44a4630a301413bdbc2ec085ec0"

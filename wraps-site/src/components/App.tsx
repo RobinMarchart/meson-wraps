@@ -2,6 +2,7 @@ import React from 'react';
 import { useStaticQuery, graphql } from 'gatsby';
 import Title from './Title';
 import Body from './Body';
+import 'fira/fira.css';
 
 const defaultLocation = {
   project: null,
