@@ -201,6 +201,11 @@ async function watchFIles(dir,watchers){
 
 exports.onPreInit = async ()=>{
   await watchFIles('../wraps',watchers);
+  let gen_watcher=fs.watch("..",{persistent:false,recursive:false});
+  gen_watcher.on("change",(event,filename)=>{
+    if(filename==="gen.py")runGen().catch(console.error);
+  });
+  gen_watcher.on("error",console.error);
   genReady=true;
   await runGen();
 };

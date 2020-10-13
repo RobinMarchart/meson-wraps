@@ -141,6 +141,9 @@ def to_opt_dir(p: str) -> pathlib.Path:
     path.mkdir(parents=True, exist_ok=True)
     return path
 
+def sha256(file_name):
+    with open(file_name,"rb") as patch_f:
+        return hashlib.sha256(patch_f.read()).hexdigest()
 
 def gen_version_dir(
     version_dir: pathlib.Path, out_dir: pathlib.Path, project_name: str, url_base: str
@@ -165,36 +168,38 @@ def gen_version_dir(
         if len(p_d) == 1:
             os.chdir(out)
             patch_file = shutil.make_archive(
-                "patch-{project}-{version}".format(
-                    project=project_name, version=version.name
-                ),
+                "patch",
                 "gztar",
                 root_dir=version_dir,
                 base_dir=p_d[0].name,
             )
+            patch_hash=sha256(patch_file)
+            os.rename(patch_file,"patch-{project}-{version}-{hash}.tar.gz".format(
+                project=project_name,version=version.name,hash=patch_hash
+            ))
             version.patch = urllib.parse.urljoin(
                 url_base,
-                "{project}/{version}/patch-{project}-{version}.tar.gz".format(
-                    project=project_name, version=version.name
+                "{project}/{version}/patch-{project}-{version}-{hash}.tar.gz".format(
+                    project=project_name, version=version.name,hash=patch_hash
                 ),
             )
             macros["patch_url"] = version.patch
-            with open(patch_file, "rb") as patch_f:
-                macros["patch_hash"] = hashlib.sha256(patch_f.read()).hexdigest()
+            macros["patch_hash"] = patch_hash
 
     if version.wrap == "":
-        path = out / (
-            "{project}-{version}.wrap".format(
-                project=project_name, version=version.name
-            )
-        )
+        path = out / "tmp.wrap"
+
         with path.open("w") as out_f:
             with (version_dir / "wrap.ini").open() as in_f:
                 out_f.write(in_f.read().format_map(macros))
+        wrap_hash=sha256(path)
+        path.rename("{project}-{version}-{hash}.wrap".format(
+            project=project_name, version=version.name, hash=wrap_hash
+        ))
         version.wrap = urllib.parse.urljoin(
             url_base,
-            "{project}/{version}/{project}-{version}.wrap".format(
-                project=project_name, version=version.name
+            "{project}/{version}/{project}-{version}-{hash}.wrap".format(
+                project=project_name, version=version.name, hash=wrap_hash
             ),
         )
     logging.debug("version template: {0!s}\n".format(version))
