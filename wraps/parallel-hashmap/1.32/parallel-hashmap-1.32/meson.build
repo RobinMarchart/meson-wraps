@@ -1,0 +1,4 @@
+project('parallel-hashmap',version:'1.32',license:'Apache-2.0')
+parallel_hashmap_dep=declare_dependency(include_directories:include_directories('.'))
+meson.override_dependency('parallel-hashmap',parallel_hashmap_dep)
+meson.override_dependency('parallelhashmap',parallel_hashmap_dep)
