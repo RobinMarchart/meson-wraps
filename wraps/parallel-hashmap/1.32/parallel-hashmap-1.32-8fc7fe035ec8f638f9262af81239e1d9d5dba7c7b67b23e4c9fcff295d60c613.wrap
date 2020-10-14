@@ -1,0 +1,13 @@
+[wrap-file]
+directory = parallel-hashmap-1.32
+
+source_url = https://github.com/greg7mdp/parallel-hashmap/archive/1.32.tar.gz
+source_filename = parallel-hashmap-1.32.tar.gz
+source_hash = 50cc7abc08f78c6396a33a334e5bc0b3ade121af8604690dae13a1bad47cf07c
+
+patch_url = https://robinmarchart.github.io/meson-wraps/wraps/parallel-hashmap/1.32/patch-parallel-hashmap-1.32-b0b51938342854a10d2fee1b8a7a0aa29f549d5718c263bf4bcc76a80bcbf2b7.tar.gz
+patch_filename = parallel-hashmap-1.32.patch.tar.gz
+patch_hash = b0b51938342854a10d2fee1b8a7a0aa29f549d5718c263bf4bcc76a80bcbf2b7
+
+[provide]
+dependency_names = parallel-hashmap, parallelhashmap, parallel-hashmap-1, parallel-hashmap-1.32

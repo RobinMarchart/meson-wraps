@@ -1,0 +1,13 @@
+[wrap-file]
+directory = concurrentqueue-1.0.2
+
+source_url = https://github.com/cameron314/concurrentqueue/archive/1.0.2.tar.gz
+source_filename = concurrentqueue-1.0.2.tar.gz
+source_hash = c3aeb97c97169f743a53ca33812ea2ab61dd06dfd28319ca3f0a0771372fc7fc
+
+patch_url = https://robinmarchart.github.io/meson-wraps/wraps/concurrentqueue/1.0.2/patch-concurrentqueue-1.0.2-2ebb05be905fe2e303d84c820966a74906e3bf953d210017947a037956f4c0bb.tar.gz
+patch_filename = concurrentqueue-1.0.2.patch.tar.gz
+patch_hash = 2ebb05be905fe2e303d84c820966a74906e3bf953d210017947a037956f4c0bb
+
+[provides]
+dependency_names = concurrentqueue-1.0.2, concurrentqueue-1.0, concurrentqueue-1, concurrentqueue

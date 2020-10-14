@@ -1,0 +1,13 @@
+[wrap-file]
+directory = fmt-7.0.2
+
+source_url = https://github.com/fmtlib/fmt/releases/download/7.0.2/fmt-7.0.2.zip
+source_filename = fmt-7.0.2.zip
+source_hash = decfdf9ad274070fa85f26407b816f5a4d82205ae86bac1990be658d0795ea4d
+
+patch_url = @patch_url@
+patch_filename = fmt-7.0.2.patch.tar.gz
+patch_hash = d7448dcda1a3b4c3889478872895c961fb22d3a8000ad1297a3f8e1d925c8fd3
+
+[provide]
+dependency_names = fmt, fmt-7.0.3, fmt-7, fmt-7.0
