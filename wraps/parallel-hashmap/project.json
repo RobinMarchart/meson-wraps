@@ -2,6 +2,6 @@
     "descr":"A family of header-only, very fast and memory-friendly hashmap and btree containers.",
     "readme":{
         "href":"https://github.com/greg7mdp/parallel-hashmap/blob/{version}/README.md",
-        "url":"https://github.com/greg7mdp/parallel-hashmap/raw/{version}/README.m"
+        "url":"https://github.com/greg7mdp/parallel-hashmap/raw/{version}/README.md"
     }
 }
